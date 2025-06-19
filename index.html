@@ -4,13 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nirmaan AI - Construction Progress Monitoring</title>
-    <meta http-equiv="refresh" content="0;url=/frontend/public/index.html">
+    <meta http-equiv="refresh" content="0;url=frontend/build/index.html">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #34495e;
+            line-height: 1.6;
         }
         .loader {
             border: 4px solid #f3f3f3;
@@ -25,13 +42,22 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <h1>Nirmaan AI</h1>
-    <p>Construction Progress Monitoring System</p>
-    <div class="loader"></div>
-    <p>Redirecting to application...</p>
-    <p>If you are not redirected automatically, <a href="/frontend/public/index.html">click here</a>.</p>
+    <div class="container">
+        <h1>Nirmaan AI</h1>
+        <p>Construction Progress Monitoring System</p>
+        <div class="loader"></div>
+        <p>Redirecting to application...</p>
+        <p>If you are not redirected automatically, <a href="frontend/build/index.html">click here</a>.</p>
+    </div>
 </body>
 </html>
