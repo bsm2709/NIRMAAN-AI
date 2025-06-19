@@ -24,12 +24,11 @@ jobs:
 
       - name: Build React app
         working-directory: frontend
-        run: npm run build
+        run: |
+          export PUBLIC_URL="https://bsm2709.github.io/NIRMAAN-AI"
+          npm run build
         env:
           CI: false
-
-      - name: Copy index.html
-        run: cp index.html frontend/build/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
