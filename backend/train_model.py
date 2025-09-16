@@ -6,12 +6,13 @@ from utils import preprocess_image
 import os
 
 # Load CSV
-df = pd.read_csv("data/metadata_autolabeled.csv")
+df = pd.read_csv("../data/metadata_autolabeled.csv")
+
 
 X_tabular = df[['timeline_days', 'progress_percent', 'budget_utilized_percent']].values
 y = df['delayed'].values
 X_images = np.array([
-    preprocess_image(os.path.join("data/images", fname)) for fname in df['image']
+    preprocess_image(os.path.join("../data/images", fname)) for fname in df['image']
 ])
 
 X_img_train, X_img_test, X_tab_train, X_tab_test, y_train, y_test = train_test_split(

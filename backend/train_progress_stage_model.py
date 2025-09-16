@@ -7,7 +7,7 @@ from tensorflow.keras.optimizers import Adam
 datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2)
 
 train_data = datagen.flow_from_directory(
-    'data/stage_data/',
+    '../data/stage_data/',
     target_size=(224, 224),
     batch_size=32,
     class_mode='sparse',
@@ -15,7 +15,7 @@ train_data = datagen.flow_from_directory(
 )
 
 val_data = datagen.flow_from_directory(
-    'data/stage_data/',
+    '../data/stage_data/',
     target_size=(224, 224),
     batch_size=32,
     class_mode='sparse',
