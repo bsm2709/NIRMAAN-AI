@@ -84,7 +84,7 @@ const ProjectForm = () => {
         budget: formData.budget ? parseFloat(formData.budget) : null
       };
 
-      const response = await axios.post('http://localhost:5000/projects', projectData, {
+      const response = await axios.post('/projects', projectData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

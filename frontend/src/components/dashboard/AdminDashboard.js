@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Typography, Grid, Card, CardContent, Button, Box, 
   CircularProgress, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Chip, Tabs, Tab
+  TableHead, TableRow, Paper, Chip, Tabs, Tab, IconButton, Tooltip
 } from '@mui/material';
+import { 
+  ArrowBack, Add, Map, People, Assessment, 
+  Construction, TrendingUp, Security, Speed
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
@@ -24,13 +28,19 @@ const AdminDashboard = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         
+        if (!token) {
+          setError('Please log in to access the admin dashboard.');
+          setLoading(false);
+          return;
+        }
+        
         // Fetch all projects
-        const projectsResponse = await axios.get('http://localhost:5000/projects/all', {
+        const projectsResponse = await axios.get('/projects/all', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         // Fetch all users
-        const usersResponse = await axios.get('http://localhost:5000/auth/users', {
+        const usersResponse = await axios.get('/auth/users', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -39,7 +49,16 @@ const AdminDashboard = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching admin data:', err);
-        setError('Failed to load admin dashboard data. Please try again later.');
+        if (err.response?.status === 401) {
+          setError('Authentication failed. Please log in again.');
+          // Redirect to login or clear token
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        } else if (err.response?.status === 403) {
+          setError('Access denied. Admin privileges required.');
+        } else {
+          setError(`Failed to load admin dashboard data: ${err.response?.data?.message || err.message}`);
+        }
         setLoading(false);
       }
     };
@@ -106,38 +125,120 @@ const AdminDashboard = () => {
 
   return (
     <Container className="dashboard-container">
-      <Box className="dashboard-header">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Admin Dashboard
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Welcome, {currentUser?.username || 'Admin'}! Manage all system aspects.
-        </Typography>
+      {/* Back Button */}
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate('/')}
+        className="back-button"
+        sx={{ mb: 3 }}
+      >
+        Back to Home
+      </Button>
+
+      <Box className="dashboard-header floating">
+        <Box display="flex" alignItems="center" gap={2} mb={2}>
+          <Construction sx={{ fontSize: 40, color: 'var(--primary)' }} />
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ 
+              background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700
+            }}>
+              Admin Dashboard
+            </Typography>
+            <Typography variant="subtitle1" gutterBottom sx={{ color: 'var(--text-light)' }}>
+              Welcome, {currentUser?.username || 'Admin'}! Manage all system aspects with AI-powered insights.
+            </Typography>
+          </Box>
+        </Box>
+        
         <Box className="dashboard-actions">
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleAddProject}
-            className="action-btn"
-          >
-            Add New Project
-          </Button>
-          <Button 
-            variant="outlined" 
-            color="primary" 
-            onClick={handleViewMap}
-            className="action-btn"
-          >
-            View Projects Map
-          </Button>
+          <Tooltip title="Create a new construction project">
+            <Button 
+              variant="contained" 
+              startIcon={<Add />}
+              onClick={handleAddProject}
+              className="action-btn glow"
+              sx={{ 
+                background: 'linear-gradient(135deg, var(--success), #22c55e)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #22c55e, #16a34a)'
+                }
+              }}
+            >
+              Add New Project
+            </Button>
+          </Tooltip>
+          
+          <Tooltip title="View projects on interactive map">
+            <Button 
+              variant="contained" 
+              startIcon={<Map />}
+              onClick={handleViewMap}
+              className="action-btn"
+              sx={{ 
+                background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, var(--primary-dark), #1d4ed8)'
+                }
+              }}
+            >
+              View Projects Map
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="admin dashboard tabs">
-          <Tab label="Projects" />
-          <Tab label="Users" />
-          <Tab label="System Stats" />
+      <Box sx={{ 
+        borderBottom: 1, 
+        borderColor: 'var(--border)', 
+        mb: 3,
+        background: 'var(--card)',
+        borderRadius: '16px 16px 0 0',
+        padding: '0 24px'
+      }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          aria-label="admin dashboard tabs"
+          sx={{
+            '& .MuiTab-root': {
+              color: 'var(--text-light)',
+              fontWeight: 500,
+              textTransform: 'none',
+              fontSize: '1rem',
+              minHeight: 60,
+              '&.Mui-selected': {
+                color: 'var(--primary)',
+                fontWeight: 600
+              }
+            },
+            '& .MuiTabs-indicator': {
+              background: 'linear-gradient(90deg, var(--gradient-start), var(--gradient-end))',
+              height: 3,
+              borderRadius: '2px 2px 0 0'
+            }
+          }}
+        >
+          <Tab 
+            icon={<Construction />} 
+            iconPosition="start" 
+            label="Projects" 
+            sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
+          />
+          <Tab 
+            icon={<People />} 
+            iconPosition="start" 
+            label="Users" 
+            sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
+          />
+          <Tab 
+            icon={<Assessment />} 
+            iconPosition="start" 
+            label="System Stats" 
+            sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
+          />
         </Tabs>
       </Box>
 
@@ -257,60 +358,150 @@ const AdminDashboard = () => {
       {activeTab === 2 && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
-            <Card className="stats-card">
+            <Card className="stats-card pulse">
               <CardContent>
-                <Typography variant="h6" gutterBottom>Projects</Typography>
-                <Typography variant="h3" color="primary">{projects.length}</Typography>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <Construction sx={{ fontSize: 32, color: 'var(--primary)' }} />
+                  <Typography variant="h6" sx={{ color: 'var(--text)', fontWeight: 600 }}>
+                    Projects
+                  </Typography>
+                </Box>
+                <Typography variant="h3" sx={{ 
+                  color: 'var(--primary)', 
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  {projects.length}
+                </Typography>
                 <Box mt={2}>
-                  <Typography variant="body2">
-                    <strong>Completed:</strong> {projects.filter(p => p.status.toLowerCase() === 'completed').length}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>In Progress:</strong> {projects.filter(p => p.status.toLowerCase() === 'in progress').length}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Delayed:</strong> {projects.filter(p => p.status.toLowerCase() === 'delayed').length}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Completed:
+                    </Typography>
+                    <Chip 
+                      label={projects.filter(p => p.status.toLowerCase() === 'completed').length}
+                      size="small"
+                      sx={{ background: 'var(--success)', color: 'white' }}
+                    />
+                  </Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      In Progress:
+                    </Typography>
+                    <Chip 
+                      label={projects.filter(p => p.status.toLowerCase() === 'in progress').length}
+                      size="small"
+                      sx={{ background: 'var(--warning)', color: 'white' }}
+                    />
+                  </Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Delayed:
+                    </Typography>
+                    <Chip 
+                      label={projects.filter(p => p.status.toLowerCase() === 'delayed').length}
+                      size="small"
+                      sx={{ background: 'var(--error)', color: 'white' }}
+                    />
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
           </Grid>
           
           <Grid item xs={12} md={4}>
-            <Card className="stats-card">
+            <Card className="stats-card pulse">
               <CardContent>
-                <Typography variant="h6" gutterBottom>Users</Typography>
-                <Typography variant="h3" color="primary">{users.length}</Typography>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <People sx={{ fontSize: 32, color: 'var(--success)' }} />
+                  <Typography variant="h6" sx={{ color: 'var(--text)', fontWeight: 600 }}>
+                    Users
+                  </Typography>
+                </Box>
+                <Typography variant="h3" sx={{ 
+                  color: 'var(--success)', 
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, var(--success), #22c55e)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  {users.length}
+                </Typography>
                 <Box mt={2}>
-                  <Typography variant="body2">
-                    <strong>Admins:</strong> {users.filter(u => u.role.toLowerCase() === 'admin').length}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Officials:</strong> {users.filter(u => u.role.toLowerCase() === 'official').length}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Citizens:</strong> {users.filter(u => u.role.toLowerCase() === 'citizen').length}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Admins:
+                    </Typography>
+                    <Chip 
+                      label={users.filter(u => u.role.toLowerCase() === 'admin').length}
+                      size="small"
+                      sx={{ background: 'var(--error)', color: 'white' }}
+                    />
+                  </Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Officials:
+                    </Typography>
+                    <Chip 
+                      label={users.filter(u => u.role.toLowerCase() === 'official').length}
+                      size="small"
+                      sx={{ background: 'var(--primary)', color: 'white' }}
+                    />
+                  </Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Citizens:
+                    </Typography>
+                    <Chip 
+                      label={users.filter(u => u.role.toLowerCase() === 'citizen').length}
+                      size="small"
+                      sx={{ background: 'var(--success)', color: 'white' }}
+                    />
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
           </Grid>
           
           <Grid item xs={12} md={4}>
-            <Card className="stats-card">
+            <Card className="stats-card glow">
               <CardContent>
-                <Typography variant="h6" gutterBottom>System Health</Typography>
-                <Typography variant="h3" color="success">Good</Typography>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <Security sx={{ fontSize: 32, color: 'var(--success)' }} />
+                  <Typography variant="h6" sx={{ color: 'var(--text)', fontWeight: 600 }}>
+                    System Health
+                  </Typography>
+                </Box>
+                <Typography variant="h3" sx={{ 
+                  color: 'var(--success)', 
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, var(--success), #22c55e)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  Excellent
+                </Typography>
                 <Box mt={2}>
-                  <Typography variant="body2">
-                    <strong>Last Backup:</strong> {new Date().toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Server Uptime:</strong> 99.9%
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>API Status:</strong> Operational
-                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <Speed sx={{ fontSize: 16, color: 'var(--success)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Server Uptime: 99.9%
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <TrendingUp sx={{ fontSize: 16, color: 'var(--primary)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      API Status: Operational
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Assessment sx={{ fontSize: 16, color: 'var(--warning)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
+                      Last Backup: {new Date().toLocaleDateString()}
+                    </Typography>
+                  </Box>
                 </Box>
               </CardContent>
             </Card>

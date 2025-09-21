@@ -45,7 +45,7 @@ const ProjectManagement = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         
-        const response = await axios.get(`http://localhost:5000/projects/${projectId}`, {
+        const response = await axios.get(`/projects/${projectId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -98,7 +98,7 @@ const ProjectManagement = () => {
       
       const token = localStorage.getItem('token');
       
-      const response = await axios.put(`http://localhost:5000/projects/${projectId}/update`, 
+      const response = await axios.put(`/projects/${projectId}/update`, 
         updateData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -107,7 +107,7 @@ const ProjectManagement = () => {
       setOpenUpdateDialog(false);
       
       // Refresh project data
-      const updatedResponse = await axios.get(`http://localhost:5000/projects/${projectId}`, {
+      const updatedResponse = await axios.get(`/projects/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProject(updatedResponse.data);

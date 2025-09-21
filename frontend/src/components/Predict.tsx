@@ -116,7 +116,7 @@ const Predict: React.FC = () => {
         formDataToSend.append('image', formData.image);
       }
 
-      const response = await fetch('http://localhost:5000/predict', {
+      const response = await fetch('/predict', {
         method: 'POST',
         body: formDataToSend,
       });

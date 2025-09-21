@@ -27,12 +27,12 @@ const ProjectDetail = () => {
         const token = localStorage.getItem('token');
         
         // Fetch project details
-        const projectResponse = await axios.get(`http://localhost:5000/projects/${projectId}`, {
+        const projectResponse = await axios.get(`/projects/${projectId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         
         // Fetch project comments
-        const commentsResponse = await axios.get(`http://localhost:5000/projects/${projectId}/comments`, {
+        const commentsResponse = await axios.get(`/projects/${projectId}/comments`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         
@@ -63,7 +63,7 @@ const ProjectDetail = () => {
       }
       
       console.log('Submitting comment:', newComment);
-      const response = await axios.post(`http://localhost:5000/projects/${projectId}/comments`, 
+      const response = await axios.post(`/projects/${projectId}/comments`, 
         { content: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -96,7 +96,7 @@ const ProjectDetail = () => {
         return;
       }
       
-      const response = await axios.post(`http://localhost:5000/projects/${projectId}/predict`, 
+      const response = await axios.post(`/projects/${projectId}/predict`, 
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

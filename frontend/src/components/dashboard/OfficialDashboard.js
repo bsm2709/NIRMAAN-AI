@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Typography, Grid, Card, CardContent, Button, Box, 
   CircularProgress, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Chip
+  TableHead, TableRow, Paper, Chip, Tooltip
 } from '@mui/material';
+import { 
+  ArrowBack, Add, Map, Construction, Assessment, 
+  TrendingUp, Speed, Security
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
@@ -24,13 +28,13 @@ const OfficialDashboard = () => {
         const token = localStorage.getItem('token');
         
         // Fetch all projects (officials can see all projects)
-        const projectsResponse = await axios.get('http://localhost:5000/projects', {
+        const projectsResponse = await axios.get('/projects', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         // Fetch unresolved comments/issues (handle error gracefully)
         try {
-          const commentsResponse = await axios.get('http://localhost:5000/projects/comments/unresolved', {
+          const commentsResponse = await axios.get('/projects/comments/unresolved', {
             headers: { Authorization: `Bearer ${token}` }
           });
           setComments(commentsResponse.data);
@@ -93,30 +97,68 @@ const OfficialDashboard = () => {
 
   return (
     <Container className="dashboard-container">
-      <Box className="dashboard-header">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Official Dashboard
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Welcome, {currentUser?.username || 'Official'}! Manage and monitor construction projects.
-        </Typography>
+      {/* Back Button */}
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate('/')}
+        className="back-button"
+        sx={{ mb: 3 }}
+      >
+        Back to Home
+      </Button>
+
+      <Box className="dashboard-header floating">
+        <Box display="flex" alignItems="center" gap={2} mb={2}>
+          <Construction sx={{ fontSize: 40, color: 'var(--primary)' }} />
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ 
+              background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700
+            }}>
+              Official Dashboard
+            </Typography>
+            <Typography variant="subtitle1" gutterBottom sx={{ color: 'var(--text-light)' }}>
+              Welcome, {currentUser?.username || 'Official'}! Manage and monitor construction projects with AI insights.
+            </Typography>
+          </Box>
+        </Box>
+        
         <Box className="dashboard-actions">
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleAddProject}
-            className="action-btn"
-          >
-            Add New Project
-          </Button>
-          <Button 
-            variant="outlined" 
-            color="primary" 
-            onClick={handleViewMap}
-            className="action-btn"
-          >
-            View Projects Map
-          </Button>
+          <Tooltip title="Create a new construction project">
+            <Button 
+              variant="contained" 
+              startIcon={<Add />}
+              onClick={handleAddProject}
+              className="action-btn glow"
+              sx={{ 
+                background: 'linear-gradient(135deg, var(--success), #22c55e)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #22c55e, #16a34a)'
+                }
+              }}
+            >
+              Add New Project
+            </Button>
+          </Tooltip>
+          
+          <Tooltip title="View projects on interactive map">
+            <Button 
+              variant="contained" 
+              startIcon={<Map />}
+              onClick={handleViewMap}
+              className="action-btn"
+              sx={{ 
+                background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, var(--primary-dark), #1d4ed8)'
+                }
+              }}
+            >
+              View Projects Map
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
 

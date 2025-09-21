@@ -36,7 +36,7 @@ const ProjectMap = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/projects/public');
+        const response = await axios.get('/projects/public');
         setProjects(response.data.filter(project => project.latitude && project.longitude));
         setLoading(false);
       } catch (err) {

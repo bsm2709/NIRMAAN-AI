@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       // Verify token and get user data
-      axios.get('http://localhost:5000/auth/profile', {
+      axios.get('/auth/profile', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const response = await axios.post('http://localhost:5000/auth/login', { email, password });
+      const response = await axios.post('/auth/login', { email, password });
       const { token, user } = response.data;
       
       // Store token in localStorage
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const response = await axios.post('http://localhost:5000/auth/register', userData);
+      const response = await axios.post('/auth/register', userData);
       return response.data;
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Card, CardContent, Button, Box, CircularProgress } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, Button, Box, CircularProgress, Tooltip } from '@mui/material';
+import { ArrowBack, Map, Construction, TrendingUp, Speed, Security } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
@@ -17,7 +18,7 @@ const CitizenDashboard = () => {
       try {
         setLoading(true);
         // Fetch public projects
-        const response = await axios.get('http://localhost:5000/projects');
+        const response = await axios.get('/projects');
         setProjects(response.data);
         setLoading(false);
       } catch (err) {
@@ -58,21 +59,50 @@ const CitizenDashboard = () => {
 
   return (
     <Container className="dashboard-container">
-      <Box className="dashboard-header">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Citizen Dashboard
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Welcome, {currentUser?.username || 'Citizen'}! Track construction projects in your area.
-        </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={handleViewMap}
-          className="view-map-btn"
-        >
-          View Projects Map
-        </Button>
+      {/* Back Button */}
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate('/')}
+        className="back-button"
+        sx={{ mb: 3 }}
+      >
+        Back to Home
+      </Button>
+
+      <Box className="dashboard-header floating">
+        <Box display="flex" alignItems="center" gap={2} mb={2}>
+          <Construction sx={{ fontSize: 40, color: 'var(--primary)' }} />
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ 
+              background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700
+            }}>
+              Citizen Dashboard
+            </Typography>
+            <Typography variant="subtitle1" gutterBottom sx={{ color: 'var(--text-light)' }}>
+              Welcome, {currentUser?.username || 'Citizen'}! Track construction projects in your area with real-time updates.
+            </Typography>
+          </Box>
+        </Box>
+        
+        <Tooltip title="View projects on interactive map">
+          <Button 
+            variant="contained" 
+            startIcon={<Map />}
+            onClick={handleViewMap}
+            className="view-map-btn glow"
+            sx={{ 
+              background: 'linear-gradient(135deg, var(--success), #22c55e)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #22c55e, #16a34a)'
+              }
+            }}
+          >
+            View Projects Map
+          </Button>
+        </Tooltip>
       </Box>
 
       <Typography variant="h5" component="h2" gutterBottom className="section-title">

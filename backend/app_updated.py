@@ -571,7 +571,7 @@ def get_all_projects():
             'end_date': project.end_date.isoformat() if project.end_date else None,
             'budget': project.budget,
             'manager_id': project.manager_id,
-            'official_name': project.manager.username if project.manager else 'Unassigned',
+            'official_name': 'Unassigned',  # Will be fixed when relationships are properly set up
             'created_at': project.created_at.isoformat()
         } for project in projects
     ])
