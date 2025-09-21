@@ -1,15 +1,34 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
 import { ReactComponent as CraneIcon } from '../assets/crane-icon.svg';
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { currentUser, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    setUserMenuOpen(false);
+  };
+
+  const handleDashboard = () => {
+    navigate('/dashboard');
+    setUserMenuOpen(false);
   };
 
   return (
@@ -50,6 +69,47 @@ function Navbar() {
         </div>
 
         <div className="nav-actions">
+          {currentUser ? (
+            <div className="user-menu-container">
+              <button 
+                className="user-menu-button"
+                onClick={toggleUserMenu}
+                aria-label="User menu"
+              >
+                <span className="user-icon">👤</span>
+                <span className="user-name">{currentUser.username}</span>
+              </button>
+              
+              {userMenuOpen && (
+                <div className="user-dropdown">
+                  <button onClick={handleDashboard} className="dropdown-item">
+                    Dashboard
+                  </button>
+                  <button onClick={handleLogout} className="dropdown-item">
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="auth-links">
+              <Link 
+                to="/login" 
+                className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
+              <Link 
+                to="/register" 
+                className={`nav-link register-link ${location.pathname === '/register' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Register
+              </Link>
+            </div>
+          )}
+          
           <button 
             className="theme-toggle" 
             onClick={toggleTheme}
