@@ -21,6 +21,12 @@ const ProjectManagement = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
+  // Check if current user can manage this project
+  const canManageProject = project && (
+    project.manager_id === currentUser?.id || 
+    currentUser?.role === 'admin'
+  );
+
   // Form state for updating project
   const [updateData, setUpdateData] = useState({
     name: '',
@@ -170,7 +176,7 @@ const ProjectManagement = () => {
       <Box className="project-header">
         <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
           <Typography variant="h4" component="h1" gutterBottom>
-            Manage Project: {project.name}
+            {canManageProject ? 'Manage Project' : 'View Project'}: {project.name}
           </Typography>
           <Chip 
             label={project.status} 
@@ -182,14 +188,16 @@ const ProjectManagement = () => {
           <strong>Location:</strong> {project.location}
         </Typography>
         <Box className="dashboard-actions">
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={() => setOpenUpdateDialog(true)}
-            className="action-btn"
-          >
-            Update Project
-          </Button>
+          {canManageProject && (
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={() => setOpenUpdateDialog(true)}
+              className="action-btn"
+            >
+              Update Project
+            </Button>
+          )}
           <Button 
             variant="outlined" 
             color="primary" 
@@ -210,6 +218,12 @@ const ProjectManagement = () => {
       {success && (
         <Alert severity="success" sx={{ mb: 2 }}>
           {success}
+        </Alert>
+      )}
+
+      {!canManageProject && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          You are viewing this project in read-only mode. Only the assigned official or admin can make changes.
         </Alert>
       )}
 
@@ -260,7 +274,7 @@ const ProjectManagement = () => {
               </Box>
               
               <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-                Project Management Actions
+                {canManageProject ? 'Project Management Actions' : 'Project Actions'}
               </Typography>
               
               <Box display="flex" gap={2} flexWrap="wrap">
@@ -278,6 +292,15 @@ const ProjectManagement = () => {
                 >
                   Back to Dashboard
                 </Button>
+                {!canManageProject && (
+                  <Button 
+                    variant="outlined" 
+                    color="warning"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    Request Management Access
+                  </Button>
+                )}
               </Box>
             </CardContent>
           </Card>

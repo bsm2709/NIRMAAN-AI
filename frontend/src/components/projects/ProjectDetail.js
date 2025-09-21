@@ -15,6 +15,7 @@ const ProjectDetail = () => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -83,6 +84,38 @@ const ProjectDetail = () => {
 
   const handleViewMap = () => {
     navigate('/map');
+  };
+
+  const handleGenerateAIPrediction = async () => {
+    try {
+      setAiLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        navigate('/login', { state: { from: `/projects/${projectId}` } });
+        return;
+      }
+      
+      const response = await axios.post(`http://localhost:5000/projects/${projectId}/predict`, 
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update project data with AI predictions
+      setProject(prevProject => ({
+        ...prevProject,
+        predicted_stage: response.data.predicted_stage,
+        confidence: response.data.confidence,
+        delay_probability: response.data.delay_probability,
+        last_prediction_date: new Date().toISOString()
+      }));
+      
+      setAiLoading(false);
+    } catch (err) {
+      console.error('Error generating AI prediction:', err);
+      setError('Failed to generate AI prediction. Please try again.');
+      setAiLoading(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -213,15 +246,39 @@ const ProjectDetail = () => {
               </Typography>
               
               <Box className="prediction-box">
-                <Typography variant="body2" gutterBottom>
-                  <strong>Predicted Stage:</strong> {project.predicted_stage || 'Not available'}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  <strong>Confidence:</strong> {project.confidence ? `${project.confidence}%` : 'Not available'}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  <strong>Probability of Delay:</strong> {project.delay_probability ? `${project.delay_probability}%` : 'Not available'}
-                </Typography>
+                {project.predicted_stage !== null && project.predicted_stage !== undefined ? (
+                  <>
+                    <Typography variant="body2" gutterBottom>
+                      <strong>Predicted Stage:</strong> {project.predicted_stage}/5
+                    </Typography>
+                    <Typography variant="body2" gutterBottom>
+                      <strong>Confidence:</strong> {project.confidence ? `${(project.confidence * 100).toFixed(1)}%` : 'N/A'}
+                    </Typography>
+                    <Typography variant="body2" gutterBottom>
+                      <strong>Probability of Delay:</strong> {project.delay_probability ? `${(project.delay_probability * 100).toFixed(1)}%` : 'N/A'}
+                    </Typography>
+                    {project.last_prediction_date && (
+                      <Typography variant="caption" color="textSecondary">
+                        Last updated: {new Date(project.last_prediction_date).toLocaleString()}
+                      </Typography>
+                    )}
+                  </>
+                ) : (
+                  <Box textAlign="center" py={2}>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      No AI prediction available yet
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleGenerateAIPrediction}
+                      disabled={aiLoading}
+                      size="small"
+                    >
+                      {aiLoading ? 'Generating...' : 'Generate AI Prediction'}
+                    </Button>
+                  </Box>
+                )}
               </Box>
             </CardContent>
           </Card>

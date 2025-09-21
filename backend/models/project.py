@@ -20,6 +20,12 @@ def create_project_models(db):
         created_at = db.Column(db.DateTime, default=datetime.utcnow)
         updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
         
+        # AI Prediction fields
+        predicted_stage = db.Column(db.Integer)  # 0-5 construction stage
+        confidence = db.Column(db.Float)  # 0-1 confidence score
+        delay_probability = db.Column(db.Float)  # 0-1 delay probability
+        last_prediction_date = db.Column(db.DateTime)
+        
         # Relationships will be defined after all models are loaded
         
         def __repr__(self):

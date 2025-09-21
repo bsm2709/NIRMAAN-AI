@@ -23,8 +23,8 @@ const OfficialDashboard = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         
-        // Fetch projects assigned to this official
-        const projectsResponse = await axios.get('http://localhost:5000/projects/official', {
+        // Fetch all projects (officials can see all projects)
+        const projectsResponse = await axios.get('http://localhost:5000/projects', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -123,12 +123,12 @@ const OfficialDashboard = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Typography variant="h5" component="h2" gutterBottom className="section-title">
-            Your Projects
+            All Projects
           </Typography>
           
           {projects.length === 0 ? (
             <Typography variant="body1" align="center" className="no-projects">
-              No projects assigned to you yet.
+              No projects available at the moment.
             </Typography>
           ) : (
             <TableContainer component={Paper} className="projects-table">
@@ -139,6 +139,7 @@ const OfficialDashboard = () => {
                     <TableCell>Location</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Progress</TableCell>
+                    <TableCell>Assigned To</TableCell>
                     <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -156,13 +157,28 @@ const OfficialDashboard = () => {
                       </TableCell>
                       <TableCell>{project.progress}%</TableCell>
                       <TableCell>
+                        {project.manager_id === currentUser?.id ? (
+                          <Chip 
+                            label="You" 
+                            color="primary" 
+                            size="small" 
+                          />
+                        ) : (
+                          <Chip 
+                            label="Other Official" 
+                            color="default" 
+                            size="small" 
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Button 
                           variant="outlined" 
                           color="primary" 
                           size="small"
                           onClick={() => handleViewProject(project.id)}
                         >
-                          Manage
+                          {project.manager_id === currentUser?.id ? 'Manage' : 'View'}
                         </Button>
                       </TableCell>
                     </TableRow>
