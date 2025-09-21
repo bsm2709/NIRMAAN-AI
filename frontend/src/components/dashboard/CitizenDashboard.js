@@ -17,7 +17,7 @@ const CitizenDashboard = () => {
       try {
         setLoading(true);
         // Fetch public projects
-        const response = await axios.get('http://localhost:5000/projects/public');
+        const response = await axios.get('http://localhost:5000/projects');
         setProjects(response.data);
         setLoading(false);
       } catch (err) {

@@ -87,6 +87,20 @@
   margin-top: 24px;
 }
 
+.stats-section {
+  padding: 16px 0;
+}
+
+.stats-section > div {
+  margin-bottom: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stats-section > div:last-child {
+  border-bottom: none;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .project-header {

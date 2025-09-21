@@ -29,13 +29,68 @@ CORS(app)
 db.init_app(app)
 jwt.init_app(app)
 
-# Import models
-from models.user import User
-from models.project import Project, Comment
+# Import models after db is initialized
+from models.user import create_user_model
+from models.project import create_project_models
 
-# Create database tables
+# Create model classes
+User = create_user_model(db)
+Project, Comment = create_project_models(db)
+
+# Create database tables after models are defined
 with app.app_context():
     db.create_all()
+
+# Add some sample projects for testing
+with app.app_context():
+    if Project.query.count() == 0:
+        sample_projects = [
+            Project(
+                name="Mumbai Metro Line 3 Extension",
+                description="Extension of Mumbai Metro Line 3 from Colaba to SEEPZ",
+                location="Mumbai, Maharashtra",
+                latitude=19.0760,
+                longitude=72.8777,
+                status="in_progress",
+                progress=75,
+                start_date=datetime(2023, 1, 15),
+                end_date=datetime(2024, 6, 30),
+                budget=15000000000,
+                manager_id=1  # Assuming first user is an official
+            ),
+            Project(
+                name="Delhi Airport Terminal 4",
+                description="Construction of new terminal building at Delhi Airport",
+                location="New Delhi, Delhi",
+                latitude=28.5562,
+                longitude=77.1000,
+                status="delayed",
+                progress=60,
+                start_date=datetime(2022, 8, 1),
+                end_date=datetime(2024, 3, 31),
+                budget=25000000000,
+                manager_id=1
+            ),
+            Project(
+                name="Bangalore Tech Park Phase 2",
+                description="Development of second phase of Bangalore Tech Park",
+                location="Bangalore, Karnataka",
+                latitude=12.9716,
+                longitude=77.5946,
+                status="in_progress",
+                progress=45,
+                start_date=datetime(2023, 6, 1),
+                end_date=datetime(2025, 12, 31),
+                budget=8000000000,
+                manager_id=1
+            )
+        ]
+        
+        for project in sample_projects:
+            db.session.add(project)
+        
+        db.session.commit()
+        print("Sample projects added to database")
 
 # Import AI model functions
 try:
@@ -150,8 +205,9 @@ def login():
         return jsonify({'message': 'Invalid email or password'}), 401
     
     # Create access token
-    access_token = jwt.create_access_token(
-        identity=user.id,
+    from flask_jwt_extended import create_access_token
+    access_token = create_access_token(
+        identity=str(user.id),
         additional_claims={'role': user.role},
         expires_delta=timedelta(days=1)
     )
@@ -170,7 +226,7 @@ def login():
 @jwt_required()
 def profile():
     # Get user ID from JWT
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     # Find user by ID
     user = User.query.get(user_id)
@@ -243,7 +299,7 @@ def create_project():
         start_date=datetime.fromisoformat(data['start_date']) if 'start_date' in data else None,
         end_date=datetime.fromisoformat(data['end_date']) if 'end_date' in data else None,
         budget=data.get('budget'),
-        manager_id=get_jwt_identity()
+        manager_id=int(get_jwt_identity())
     )
     
     # Save to database
@@ -261,15 +317,21 @@ def get_project_comments(project_id):
     project = Project.query.get_or_404(project_id)
     comments = Comment.query.filter_by(project_id=project_id).order_by(Comment.created_at).all()
     
-    return jsonify([
-        {
+    result = []
+    for comment in comments:
+        # Get the author information
+        author = User.query.get(comment.author_id)
+        author_name = author.username if author else 'Unknown User'
+        
+        result.append({
             'id': comment.id,
             'content': comment.content,
             'author_id': comment.author_id,
-            'author_name': comment.author.username,
+            'author_name': author_name,
             'created_at': comment.created_at.isoformat()
-        } for comment in comments
-    ])
+        })
+    
+    return jsonify(result)
 
 @app.route('/projects/<int:project_id>/comments', methods=['POST'])
 @jwt_required()
@@ -280,7 +342,7 @@ def add_project_comment(project_id):
     # Create new comment
     new_comment = Comment(
         content=data['content'],
-        author_id=get_jwt_identity(),
+        author_id=int(get_jwt_identity()),
         project_id=project_id
     )
     
@@ -288,13 +350,181 @@ def add_project_comment(project_id):
     db.session.add(new_comment)
     db.session.commit()
     
+    # Get the author information
+    author = User.query.get(new_comment.author_id)
+    author_name = author.username if author else 'Unknown User'
+    
     return jsonify({
         'id': new_comment.id,
         'content': new_comment.content,
         'author_id': new_comment.author_id,
-        'author_name': new_comment.author.username,
+        'author_name': author_name,
         'created_at': new_comment.created_at.isoformat()
     }), 201
+
+# Official Dashboard endpoints
+@app.route('/projects/official', methods=['GET'])
+@jwt_required()
+def get_official_projects():
+    """Get projects assigned to the current official"""
+    official_id = int(get_jwt_identity())
+    projects = Project.query.filter_by(manager_id=official_id).all()
+    
+    return jsonify([
+        {
+            'id': project.id,
+            'name': project.name,
+            'description': project.description,
+            'location': project.location,
+            'latitude': project.latitude,
+            'longitude': project.longitude,
+            'status': project.status,
+            'progress': project.progress,
+            'start_date': project.start_date.isoformat() if project.start_date else None,
+            'end_date': project.end_date.isoformat() if project.end_date else None,
+            'budget': project.budget,
+            'manager_id': project.manager_id,
+            'created_at': project.created_at.isoformat()
+        } for project in projects
+    ])
+
+@app.route('/projects/comments/unresolved', methods=['GET'])
+@jwt_required()
+def get_unresolved_comments():
+    """Get unresolved comments for projects managed by the current official"""
+    official_id = int(get_jwt_identity())
+    
+    # Get projects managed by this official
+    official_projects = Project.query.filter_by(manager_id=official_id).all()
+    project_ids = [p.id for p in official_projects]
+    
+    # Get comments for these projects (assuming all comments are unresolved for now)
+    comments = Comment.query.filter(Comment.project_id.in_(project_ids)).order_by(Comment.created_at.desc()).all()
+    
+    return jsonify([
+        {
+            'id': comment.id,
+            'content': comment.content,
+            'author_id': comment.author_id,
+            'author_name': comment.author.username,
+            'project_id': comment.project_id,
+            'project_name': comment.project.name,
+            'created_at': comment.created_at.isoformat()
+        } for comment in comments
+    ])
+
+@app.route('/projects/<int:project_id>/update', methods=['PUT'])
+@jwt_required()
+def update_project(project_id):
+    """Update project details - only by assigned official or admin"""
+    project = Project.query.get_or_404(project_id)
+    current_user_id = int(get_jwt_identity())
+    
+    # Check if user is the project manager or admin
+    if project.manager_id != current_user_id:
+        # Check if user is admin (you might want to add role checking here)
+        return jsonify({'message': 'Unauthorized to update this project'}), 403
+    
+    data = request.get_json()
+    
+    # Update project fields
+    if 'name' in data:
+        project.name = data['name']
+    if 'description' in data:
+        project.description = data['description']
+    if 'location' in data:
+        project.location = data['location']
+    if 'latitude' in data:
+        project.latitude = data['latitude']
+    if 'longitude' in data:
+        project.longitude = data['longitude']
+    if 'status' in data:
+        project.status = data['status']
+    if 'progress' in data:
+        project.progress = data['progress']
+    if 'start_date' in data:
+        project.start_date = datetime.fromisoformat(data['start_date']) if data['start_date'] else None
+    if 'end_date' in data:
+        project.end_date = datetime.fromisoformat(data['end_date']) if data['end_date'] else None
+    if 'budget' in data:
+        project.budget = data['budget']
+    
+    project.updated_at = datetime.utcnow()
+    
+    # Save to database
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Project updated successfully',
+        'project': {
+            'id': project.id,
+            'name': project.name,
+            'status': project.status,
+            'progress': project.progress
+        }
+    }), 200
+
+# Additional endpoints for frontend compatibility
+@app.route('/projects/public', methods=['GET'])
+def get_public_projects():
+    """Get public projects for map display"""
+    projects = Project.query.all()
+    return jsonify([
+        {
+            'id': project.id,
+            'name': project.name,
+            'description': project.description,
+            'location': project.location,
+            'latitude': project.latitude,
+            'longitude': project.longitude,
+            'status': project.status,
+            'progress': project.progress,
+            'start_date': project.start_date.isoformat() if project.start_date else None,
+            'end_date': project.end_date.isoformat() if project.end_date else None,
+            'budget': project.budget,
+            'manager_id': project.manager_id,
+            'created_at': project.created_at.isoformat()
+        } for project in projects
+    ])
+
+@app.route('/projects/all', methods=['GET'])
+@jwt_required()
+def get_all_projects():
+    """Get all projects for admin dashboard"""
+    projects = Project.query.all()
+    return jsonify([
+        {
+            'id': project.id,
+            'name': project.name,
+            'description': project.description,
+            'location': project.location,
+            'latitude': project.latitude,
+            'longitude': project.longitude,
+            'status': project.status,
+            'progress': project.progress,
+            'start_date': project.start_date.isoformat() if project.start_date else None,
+            'end_date': project.end_date.isoformat() if project.end_date else None,
+            'budget': project.budget,
+            'manager_id': project.manager_id,
+            'official_name': project.manager.username if project.manager else 'Unassigned',
+            'created_at': project.created_at.isoformat()
+        } for project in projects
+    ])
+
+@app.route('/auth/users', methods=['GET'])
+@jwt_required()
+def get_all_users():
+    """Get all users for admin dashboard"""
+    users = User.query.all()
+    return jsonify([
+        {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'created_at': user.created_at.isoformat() if hasattr(user, 'created_at') else None
+        } for user in users
+    ])
 
 if __name__ == "__main__":
     app.run(debug=True)

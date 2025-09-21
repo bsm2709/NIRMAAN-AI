@@ -375,12 +375,32 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 2rem;
-  height: calc(100vh - 80px); /* Adjust based on navbar height */
+  min-height: calc(100vh - 80px); /* Adjust based on navbar height */
+  background: linear-gradient(135deg, var(--background) 0%, rgba(37, 99, 235, 0.05) 100%);
 }
 
 .home-content {
   width: 50%;
   text-align: left;
+  z-index: 2;
+}
+
+.home-content h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--primary), #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.home-content .subtitle {
+  font-size: 1.25rem;
+  color: var(--text-light);
+  margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
 .features-grid {

@@ -28,13 +28,18 @@ const OfficialDashboard = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // Fetch unresolved comments/issues
-        const commentsResponse = await axios.get('http://localhost:5000/projects/comments/unresolved', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        // Fetch unresolved comments/issues (handle error gracefully)
+        try {
+          const commentsResponse = await axios.get('http://localhost:5000/projects/comments/unresolved', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setComments(commentsResponse.data);
+        } catch (commentErr) {
+          console.log('No comments endpoint available, setting empty array');
+          setComments([]);
+        }
         
         setProjects(projectsResponse.data);
-        setComments(commentsResponse.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -194,7 +199,7 @@ const OfficialDashboard = () => {
                     </Typography>
                     <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
                       <Typography variant="caption" color="textSecondary">
-                        By: {comment.user_name} • {new Date(comment.created_at).toLocaleDateString()}
+                        By: {comment.author_name || 'Unknown User'} • {new Date(comment.created_at).toLocaleDateString()}
                       </Typography>
                       <Button 
                         variant="outlined" 

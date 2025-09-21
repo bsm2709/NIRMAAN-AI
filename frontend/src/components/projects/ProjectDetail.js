@@ -61,15 +61,20 @@ const ProjectDetail = () => {
         return;
       }
       
+      console.log('Submitting comment:', newComment);
       const response = await axios.post(`http://localhost:5000/projects/${projectId}/comments`, 
         { content: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
+      console.log('Comment response:', response.data);
+      
       // Add the new comment to the list
-      setComments([...comments, response.data]);
+      setComments(prevComments => [...prevComments, response.data]);
       setNewComment('');
       setCommentLoading(false);
+      
+      console.log('Comments after adding:', [...comments, response.data]);
     } catch (err) {
       console.error('Error submitting comment:', err);
       setCommentLoading(false);
@@ -243,7 +248,7 @@ const ProjectDetail = () => {
                         </Typography>
                         <Box display="flex" justifyContent="space-between" mt={1}>
                           <Typography variant="caption" color="textSecondary">
-                            By: {comment.user_name}
+                            By: {comment.author_name || 'Unknown User'}
                           </Typography>
                           <Typography variant="caption" color="textSecondary">
                             {new Date(comment.created_at).toLocaleDateString()}
