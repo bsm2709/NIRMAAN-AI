@@ -119,18 +119,28 @@ const CitizenDashboard = () => {
             <Grid item xs={12} sm={6} md={4} key={project.id}>
               <Card className="project-card">
                 <CardContent>
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    {project.name}
-                  </Typography>
+                  <Box className="card-title-row" mb={1}>
+                    <Typography variant="h6" component="h3">
+                      {project.name}
+                    </Typography>
+                    <span className={`status-badge ${
+                      project.status === 'delayed' ? 'status-badge--delayed' :
+                      project.status === 'completed' ? 'status-badge--completed' :
+                      project.status === 'planned' ? 'status-badge--planned' :
+                      'status-badge--inprogress'
+                    }`}>
+                      {project.status.replace('_',' ')}
+                    </span>
+                  </Box>
                   <Typography variant="body2" color="textSecondary" gutterBottom>
                     <strong>Location:</strong> {project.location}
                   </Typography>
                   <Typography variant="body2" color="textSecondary" gutterBottom>
-                    <strong>Status:</strong> {project.status}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
                     <strong>Progress:</strong> {project.progress}%
                   </Typography>
+                  <Box className="progress-bar-modern" mt={1}>
+                    <Box sx={{ width: `${project.progress}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), var(--primary-dark))' }} />
+                  </Box>
                   {project.delay_status && (
                     <Typography variant="body2" color="error" gutterBottom>
                       <strong>Delay:</strong> {project.delay_status}

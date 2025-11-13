@@ -37,10 +37,12 @@
 }
 
 .prediction-box {
-  background-color: #f5f5f5;
+  background-color: var(--card);
+  color: var(--text);
   padding: 16px;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-top: 8px;
+  border: 1px solid var(--border);
 }
 
 .comments-list {

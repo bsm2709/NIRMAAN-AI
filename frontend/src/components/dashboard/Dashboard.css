@@ -1,18 +1,18 @@
 /* Enhanced Dashboard Styles with Dark Mode Support */
 .dashboard-container {
-  padding: 24px 0;
+  padding: 24px 0 48px;
   max-width: 1200px;
-  background: linear-gradient(135deg, var(--background) 0%, rgba(59, 130, 246, 0.05) 100%);
+  background: var(--background);
   min-height: calc(100vh - 80px);
 }
 
 .dashboard-header {
-  margin-bottom: 32px;
-  padding: 24px;
+  margin-bottom: 24px;
+  padding: 20px 20px 16px;
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid var(--border);
-  box-shadow: 0 8px 32px var(--shadow);
+  box-shadow: 0 6px 18px var(--shadow);
   position: relative;
   overflow: hidden;
 }
@@ -23,8 +23,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
 }
 
 .dashboard-actions {
@@ -38,11 +38,11 @@
   text-transform: none;
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
+  border-radius: 10px;
+  padding: 10px 18px;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
   position: relative;
   overflow: hidden;
 }
@@ -68,13 +68,13 @@
 }
 
 .section-title {
-  margin-top: 24px;
-  margin-bottom: 20px;
-  font-weight: 600;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-weight: 700;
   color: var(--text);
-  font-size: 1.5rem;
+  font-size: 1.15rem;
   position: relative;
-  padding-left: 16px;
+  padding-left: 14px;
 }
 
 .section-title::before {
@@ -91,12 +91,44 @@
 
 .project-card {
   height: 100%;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
+  box-shadow: 0 6px 18px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.project-card .card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--primary);
+  color: #ffffff;
+  border: 1px solid var(--primary);
+  text-transform: capitalize;
+}
+
+.status-badge--delayed { background: #ef4444; color: #ffffff; border-color: #ef4444; }
+.status-badge--inprogress { background: #22c55e; color: #ffffff; border-color: #22c55e; }
+.status-badge--completed { background: #3b82f6; color: #ffffff; border-color: #3b82f6; }
+.status-badge--planned { background: #f59e0b; color: #0b1220; border-color: #f59e0b; }
+
+.progress-bar-modern {
+  height: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--border);
+  border: none;
 }
 
 .project-card::before {
@@ -116,8 +148,8 @@
 }
 
 .project-card:hover {
-  transform: translateY(-8px) rotateX(5deg);
-  box-shadow: 0 20px 40px var(--shadow);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px var(--shadow);
   border-color: var(--primary);
 }
 
@@ -132,24 +164,24 @@
 }
 
 .projects-table {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 32px var(--shadow);
+  box-shadow: 0 6px 20px var(--shadow);
   border: 1px solid var(--border);
 }
 
 .projects-table .MuiTableHead-root {
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)) , var(--card);
 }
 
 .projects-table .MuiTableHead-root .MuiTableCell-head {
-  color: white;
-  font-weight: 600;
-  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .projects-table .MuiTableBody-root .MuiTableRow-root {
@@ -157,14 +189,13 @@
 }
 
 .projects-table .MuiTableBody-root .MuiTableRow-root:hover {
-  background: rgba(59, 130, 246, 0.05);
-  transform: scale(1.01);
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .projects-table .MuiTableCell-root {
   border-bottom: 1px solid var(--border);
   color: var(--text);
-  padding: 16px;
+  padding: 14px 16px;
 }
 
 .comments-card {
@@ -172,9 +203,9 @@
   max-height: 500px;
   overflow-y: auto;
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid var(--border);
-  box-shadow: 0 8px 32px var(--shadow);
+  box-shadow: 0 6px 20px var(--shadow);
 }
 
 .comments-card::-webkit-scrollbar {
@@ -192,12 +223,12 @@
 }
 
 .comment-item {
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: 14px;
+  padding: 14px;
   background: var(--background);
-  border-radius: 12px;
-  border-left: 4px solid var(--primary);
-  transition: all 0.2s ease;
+  border-radius: 10px;
+  border-left: 3px solid var(--primary);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .comment-item:hover {
@@ -208,9 +239,9 @@
 .stats-card {
   height: 100%;
   text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;

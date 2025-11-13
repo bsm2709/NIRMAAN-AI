@@ -3,10 +3,13 @@ from tensorflow.keras.preprocessing import image
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Load models
-stage_model = load_model("progress_stage_model.h5")
-yolo_model = YOLO("yolov8n.pt")
+stage_model = load_model(os.path.join(BASE_DIR, "progress_stage_model.h5"))
+yolo_model = YOLO(os.path.join(BASE_DIR, "yolov8n.pt"))
 
 # Stage mapping
 stage_to_percent = {0: 10, 1: 25, 2: 50, 3: 70, 4: 90, 5: 100}
